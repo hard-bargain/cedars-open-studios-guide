@@ -292,10 +292,12 @@
   ],
   "userState": {
     "skippedStudios": [],
-    "favoritedStudios": [],
+    "favoritedStudios": [
+      33
+    ],
     "visitedStudios": []
   },
-  "lastUpdated": "2025-10-25T17:28:45.449Z",
+  "lastUpdated": "2025-10-25T17:33:02.539Z",
   "version": "1.0.0",
-  "_sha": "07cfafa20115fcaaa9ccacdeb4b677f76c5d65f1"
+  "_sha": "1aa51b8fba0ac9677a188acdc3ad7fbffce73806"
 }
