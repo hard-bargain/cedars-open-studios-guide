@@ -320,6 +320,25 @@
             background: var(--creative-gradient);
         }
 
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .cos-logo {
+            max-height: 80px;
+            max-width: 100%;
+            height: auto;
+            filter: drop-shadow(0 2px 8px rgba(45, 27, 31, 0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .cos-logo:hover {
+            transform: scale(1.02);
+        }
+
         .list-header h1 {
             margin: 0 0 12px 0;
             font-size: 34px;
@@ -332,6 +351,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-family: 'Inter', Georgia, serif;
+            text-align: center;
         }
 
         .list-header .event-date {
@@ -342,6 +362,7 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             font-family: 'Inter', sans-serif;
+            text-align: center;
         }
 
         .list-header .event-description {
@@ -351,6 +372,7 @@
             line-height: 1.5;
             font-style: italic;
             font-family: Georgia, serif;
+            text-align: center;
         }
 
         .list-header p {
@@ -358,6 +380,12 @@
             color: var(--text-secondary);
             font-size: 14px;
             font-weight: 500;
+            text-align: center;
+        }
+
+        .featured-art-section {
+            margin: 20px 0;
+            text-align: center;
         }
 
         .featured-art-badge {
@@ -370,8 +398,33 @@
             border-radius: 20px;
             font-size: 13px;
             font-weight: 500;
-            margin-top: 12px;
+            margin-bottom: 16px;
             border: 1px solid rgba(212, 165, 116, 0.3);
+        }
+
+        .featured-artwork {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .featured-art-image {
+            max-width: 100%;
+            max-height: 200px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 
+                0 8px 32px rgba(45, 27, 31, 0.15),
+                0 2px 8px rgba(45, 27, 31, 0.08);
+            border: 3px solid rgba(212, 165, 116, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .featured-art-image:hover {
+            transform: scale(1.02);
+            box-shadow: 
+                0 12px 48px rgba(45, 27, 31, 0.2),
+                0 4px 16px rgba(45, 27, 31, 0.12);
         }
 
         .placeholder-notice {
@@ -818,13 +871,27 @@
     
     <div id="listView">
         <div class="list-header">
-            <h1 id="tourTitle">Cedars Open Studios Tour</h1>
+            <div class="logo-container">
+                <img src="https://images.squarespace-cdn.com/content/v1/624c7bb02ee91f072f952470/5ab256f3-bca4-4691-9e1f-1b3004ed8af5/COS_BlockLogo.png" 
+                     alt="Cedars Open Studios" 
+                     class="cos-logo"
+                     onerror="this.style.display='none'; document.getElementById('fallbackTitle').style.display='block';">
+                <h1 id="fallbackTitle" style="display: none;">Cedars Open Studios Tour</h1>
+            </div>
             <div class="event-date" id="eventDate">November 22, 2025 | 11 AM - 6 PM</div>
             <div class="event-description">A beloved tradition celebrating the vibrant work of 150+ Cedars artists in the historic neighborhood of Dallas, TX</div>
             <p id="routeStats"></p>
-            <div class="featured-art-badge">
-                <span class="material-icons" style="font-size: 16px;">palette</span>
-                Featured Art: "Bark" by Purva Chawla
+            <div class="featured-art-section">
+                <div class="featured-art-badge">
+                    <span class="material-icons" style="font-size: 16px;">palette</span>
+                    Featured Art: "Bark" by Purva Chawla
+                </div>
+                <div class="featured-artwork">
+                    <img src="https://images.squarespace-cdn.com/content/v1/624c7bb02ee91f072f952470/e15800ec-283b-467b-ac59-a52da73a71cb/COS2025_Bark_eCard_600x450.jpg" 
+                         alt="Bark by Purva Chawla - Featured Artwork" 
+                         class="featured-art-image"
+                         onerror="this.style.display='none';">
+                </div>
             </div>
             <div id="placeholderNotice" class="placeholder-notice" style="display: none;">
                 <strong>⚠️ Placeholder Data:</strong> Currently showing White Rock Lake studios as placeholders. This will be updated when Cedars Open Studios publishes their 2025 route.
@@ -1004,7 +1071,8 @@
             // Update UI with tour config
             if (tourData.tourConfig) {
                 const config = tourData.tourConfig;
-                document.getElementById('tourTitle').textContent = config.name || 'Cedars Open Studios Tour';
+                
+                // Update event date
                 document.getElementById('eventDate').textContent = `${config.date || 'November 22, 2025'} | ${config.hours || '11 AM - 6 PM'}`;
                 
                 // Show placeholder notice if needed
