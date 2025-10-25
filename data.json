@@ -295,14 +295,16 @@
       22,
       35
     ],
-    "favoritedStudios": [],
+    "favoritedStudios": [
+      16
+    ],
     "visitedStudios": [
       35,
       24,
       15
     ]
   },
-  "lastUpdated": "2025-10-25T01:19:05.419Z",
+  "lastUpdated": "2025-10-25T01:19:07.706Z",
   "version": "1.0.0",
-  "_sha": "a5dfce1057bb6d811daaaf1d9cb72a07b9c1751e"
+  "_sha": "7fd0817f641d06c23e39dc0cc303d11aad81b8c8"
 }
