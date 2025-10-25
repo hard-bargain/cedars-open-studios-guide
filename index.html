@@ -234,6 +234,24 @@
             margin-top: 8px;
         }
 
+        .popup-favorite-btn:hover {
+            background: rgba(212, 165, 116, 0.2) !important;
+            transform: scale(1.1) !important;
+        }
+        
+        .popup-favorite-btn:active {
+            transform: scale(1.2) !important;
+        }
+        
+        .popup-toggle-btn, .popup-visited-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .popup-toggle-btn:hover, .popup-visited-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(45, 27, 31, 0.2);
+        }
+
         .toggle-button, .favorite-button {
             width: 100%;
             padding: 10px;
@@ -1218,6 +1236,53 @@
             createMarkers();
             updateRoute();
             updateListView();
+            
+            // Set up event delegation for popup buttons
+            setupPopupEventHandlers();
+        }
+        
+        function setupPopupEventHandlers() {
+            // Use event delegation to handle popup button clicks
+            document.addEventListener('click', function(e) {
+                // Handle favorite button clicks
+                if (e.target.closest('.popup-favorite-btn')) {
+                    const btn = e.target.closest('.popup-favorite-btn');
+                    const studioNum = parseInt(btn.dataset.studio);
+                    toggleFavorite(studioNum);
+                    return;
+                }
+                
+                // Handle toggle studio button clicks
+                if (e.target.closest('.popup-toggle-btn')) {
+                    const btn = e.target.closest('.popup-toggle-btn');
+                    const studioNum = parseInt(btn.dataset.studio);
+                    toggleStudio(studioNum);
+                    return;
+                }
+                
+                // Handle visited button clicks
+                if (e.target.closest('.popup-visited-btn')) {
+                    const btn = e.target.closest('.popup-visited-btn');
+                    const studioNum = parseInt(btn.dataset.studio);
+                    toggleVisited(studioNum);
+                    return;
+                }
+            });
+            
+            // Add hover effects for popup favorite buttons
+            document.addEventListener('mouseover', function(e) {
+                if (e.target.closest('.popup-favorite-btn')) {
+                    e.target.closest('.popup-favorite-btn').style.background = 'rgba(212, 165, 116, 0.2)';
+                    e.target.closest('.popup-favorite-btn').style.transform = 'scale(1.1)';
+                }
+            });
+            
+            document.addEventListener('mouseout', function(e) {
+                if (e.target.closest('.popup-favorite-btn')) {
+                    e.target.closest('.popup-favorite-btn').style.background = 'transparent';
+                    e.target.closest('.popup-favorite-btn').style.transform = 'scale(1)';
+                }
+            });
         }
         
         function switchView(view) {
@@ -1341,7 +1406,7 @@
             const visitedButtonClass = isVisited ? 'favorited' : '';
             const visitedButtonText = isVisited ? '<span class="material-icons" style="font-size: 16px; vertical-align: middle;">check_box</span> Visited' : '<span class="material-icons" style="font-size: 16px; vertical-align: middle;">check_box_outline_blank</span> Visit';
             
-            const favoriteIcon = isFavorited ? '<span class="material-icons" style="color: #dc2626;">favorite</span>' : '<span class="material-icons" style="color: #d1d5db;">favorite_border</span>';
+            const favoriteIcon = isFavorited ? '<span class="material-icons" style="color: #a0522d;">favorite</span>' : '<span class="material-icons" style="color: #d1d5db;">favorite_border</span>';
             
             const routeInfo = isSkipped ? '' : `<p><strong>Route Stop:</strong> #${routeOrder}</p>`;
             
@@ -1350,7 +1415,7 @@
             return `<div class="custom-popup">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                 <h4 style="margin: 0 0 8px 0; flex: 1;">${startLabel}${studio.name}</h4>
-                <span style="font-size: 24px; cursor: pointer; user-select: none;" onclick="toggleFavorite(${studio.num})">${favoriteIcon}</span>
+                <span class="popup-favorite-btn" data-studio="${studio.num}" style="font-size: 24px; cursor: pointer; user-select: none; padding: 4px; border-radius: 50%; transition: all 0.2s ease;">${favoriteIcon}</span>
                 </div>
                 <p><strong>Brochure #${studio.num}</strong></p>
                 ${routeInfo}
@@ -1358,8 +1423,8 @@
                 ${websiteLink}
                 <a href="https://maps.apple.com/?daddr=${encodeURIComponent(studio.address)}" target="_blank" rel="noopener noreferrer"><span class="material-icons" style="font-size: 16px; vertical-align: middle;">directions</span> Get Directions</a>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-                <button class="toggle-button ${toggleButtonClass}" onclick="toggleStudio(${studio.num})">${toggleButtonText}</button>
-                <button class="toggle-button ${visitedButtonClass}" onclick="toggleVisited(${studio.num})">${visitedButtonText}</button>
+                <button class="popup-toggle-btn toggle-button ${toggleButtonClass}" data-studio="${studio.num}">${toggleButtonText}</button>
+                <button class="popup-visited-btn toggle-button ${visitedButtonClass}" data-studio="${studio.num}">${visitedButtonText}</button>
                 </div></div>`;
         }
         
