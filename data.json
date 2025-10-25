@@ -298,10 +298,11 @@
     "favoritedStudios": [],
     "visitedStudios": [
       35,
-      24
+      24,
+      15
     ]
   },
-  "lastUpdated": "2025-10-25T01:18:54.234Z",
+  "lastUpdated": "2025-10-25T01:19:05.419Z",
   "version": "1.0.0",
-  "_sha": "59a30a64aedcf5185227cbf8779a1fae38a99d9a"
+  "_sha": "a5dfce1057bb6d811daaaf1d9cb72a07b9c1751e"
 }
