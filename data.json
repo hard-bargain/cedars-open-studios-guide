@@ -291,13 +291,15 @@
     }
   ],
   "userState": {
-    "skippedStudios": [],
+    "skippedStudios": [
+      5
+    ],
     "favoritedStudios": [
       16
     ],
     "visitedStudios": []
   },
-  "lastUpdated": "2025-10-25T17:16:18.314Z",
+  "lastUpdated": "2025-10-25T17:17:21.528Z",
   "version": "1.0.0",
-  "_sha": "023e65149b5468ae5b3e3bb73234f52f923bf583"
+  "_sha": "9cdc8b34c26603a8da94d53a84f1ec32fe393a8f"
 }
