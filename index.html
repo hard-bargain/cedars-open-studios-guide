@@ -1249,6 +1249,9 @@
                     const btn = e.target.closest('.popup-favorite-btn');
                     const studioNum = parseInt(btn.dataset.studio);
                     toggleFavorite(studioNum);
+                    
+                    // Update the favorite icon immediately
+                    updateFavoriteIcon(btn, studioNum);
                     return;
                 }
                 
@@ -1257,6 +1260,9 @@
                     const btn = e.target.closest('.popup-toggle-btn');
                     const studioNum = parseInt(btn.dataset.studio);
                     toggleStudio(studioNum);
+                    
+                    // Update the button appearance immediately
+                    updateToggleButton(btn, studioNum);
                     return;
                 }
                 
@@ -1265,6 +1271,9 @@
                     const btn = e.target.closest('.popup-visited-btn');
                     const studioNum = parseInt(btn.dataset.studio);
                     toggleVisited(studioNum);
+                    
+                    // Update the button appearance immediately
+                    updateVisitedButton(btn, studioNum);
                     return;
                 }
             });
@@ -1283,6 +1292,36 @@
                     e.target.closest('.popup-favorite-btn').style.transform = 'scale(1)';
                 }
             });
+        }
+        
+        function updateFavoriteIcon(btn, studioNum) {
+            const isFavorited = favoritedStudios.has(studioNum);
+            const favoriteIcon = isFavorited 
+                ? '<span class="material-icons" style="color: #a0522d;">favorite</span>' 
+                : '<span class="material-icons" style="color: #d1d5db;">favorite_border</span>';
+            btn.innerHTML = favoriteIcon;
+        }
+        
+        function updateToggleButton(btn, studioNum) {
+            const isSkipped = skippedStudios.has(studioNum);
+            const toggleButtonClass = isSkipped ? 'skipped' : 'included';
+            const toggleButtonText = isSkipped 
+                ? '<span class="material-icons" style="font-size: 16px; vertical-align: middle;">add_circle</span> Add Back' 
+                : '<span class="material-icons" style="font-size: 16px; vertical-align: middle;">cancel</span> Skip';
+            
+            btn.className = `popup-toggle-btn toggle-button ${toggleButtonClass}`;
+            btn.innerHTML = toggleButtonText;
+        }
+        
+        function updateVisitedButton(btn, studioNum) {
+            const isVisited = visitedStudios.has(studioNum);
+            const visitedButtonClass = isVisited ? 'favorited' : '';
+            const visitedButtonText = isVisited 
+                ? '<span class="material-icons" style="font-size: 16px; vertical-align: middle;">check_box</span> Visited' 
+                : '<span class="material-icons" style="font-size: 16px; vertical-align: middle;">check_box_outline_blank</span> Visit';
+            
+            btn.className = `popup-visited-btn toggle-button ${visitedButtonClass}`;
+            btn.innerHTML = visitedButtonText;
         }
         
         function switchView(view) {
@@ -1443,6 +1482,15 @@
             const includedStudios = studios.filter(s => !skippedStudios.has(s.num));
             const routeOrder = calculateOptimalRoute(includedStudios);
             
+            // Keep track of which popup is currently open
+            let openPopupStudioNum = null;
+            Object.keys(markers).forEach(studioNum => {
+                const marker = markers[studioNum];
+                if (marker && marker.isPopupOpen()) {
+                    openPopupStudioNum = parseInt(studioNum);
+                }
+            });
+            
             // Update all markers with route order
             routeOrder.forEach(function(studio, index) {
                 const routeNum = index + 1;
@@ -1454,6 +1502,11 @@
                 // Unbind old popup and bind new one
                 marker.unbindPopup();
                 marker.bindPopup(createPopupContent(studio, routeNum));
+                
+                // If this popup was open, reopen it with new content
+                if (openPopupStudioNum === studio.num) {
+                    marker.openPopup();
+                }
             });
             
             // Update skipped markers
@@ -1468,6 +1521,11 @@
                     // Unbind old popup and bind new one
                     marker.unbindPopup();
                     marker.bindPopup(createPopupContent(studio, null));
+                    
+                    // If this popup was open, reopen it with new content
+                    if (openPopupStudioNum === studioNum) {
+                        marker.openPopup();
+                    }
                 }
             });
             
