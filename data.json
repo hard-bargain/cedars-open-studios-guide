@@ -294,10 +294,11 @@
     "skippedStudios": [],
     "favoritedStudios": [],
     "visitedStudios": [
-      35
+      35,
+      24
     ]
   },
-  "lastUpdated": "2025-10-25T01:18:22.648Z",
+  "lastUpdated": "2025-10-25T01:18:26.355Z",
   "version": "1.0.0",
-  "_sha": "e699de279caa4eafa554322c453d7721a2b1ec59"
+  "_sha": "77b4d5f65cc9eba8a5dece97012d7352255f4900"
 }
