@@ -953,15 +953,30 @@
         let tourData = null;
         let studios = [];
         
-        // GitHub configuration - Team token approach
+        // GitHub configuration - Environment variable approach (secure)
         const GITHUB_OWNER = getRepoOwner();
         const GITHUB_REPO = getRepoName();
         
-        // TEAM CONFIGURATION: Set your shared GitHub token here
-        // To set up: 1) Create Personal Access Token with 'repo' permissions
-        //           2) Replace 'YOUR_TEAM_TOKEN_HERE' with your actual token
-        //           3) Commit and deploy - all team members get automatic access
-        const GITHUB_TOKEN = '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';
+        // SECURE CONFIGURATION: Token loaded from environment or prompt
+        // This prevents GitHub from detecting and auto-deleting the token
+        function getGitHubToken() {
+            // Try environment variable first (for deployment)
+            if (typeof process !== 'undefined' && process.env && process.env.GITHUB_TOKEN) {
+                return process.env.GITHUB_TOKEN;
+            }
+            
+            // Try localStorage (preserved across sessions)
+            let token = localStorage.getItem('cedars_github_token');
+            if (!token) {
+                token = prompt(`🔑 GitHub Token Setup\n\nTo enable route sharing:\n1. Go to github.com/settings/tokens\n2. Create token with 'repo' permissions\n3. Enter token below:\n\n(This will be saved for future use)`);
+                if (token) {
+                    localStorage.setItem('cedars_github_token', token);
+                }
+            }
+            return token;
+        }
+        
+        const GITHUB_TOKEN = getGitHubToken();
         const DATA_FILE_PATH = 'data.json';
         
         function getRepoOwner() {
@@ -1014,6 +1029,10 @@
         }
         
         async function loadFromGitHub() {
+            if (!GITHUB_TOKEN) {
+                throw new Error('GitHub token required. Please refresh and enter your token when prompted.');
+            }
+            
             // Diagnostic logging
             console.log('=== GitHub Configuration Diagnostics ===');
             console.log('Current URL:', window.location.href);
@@ -1021,12 +1040,8 @@
             console.log('Pathname:', window.location.pathname);
             console.log('- Owner detected:', GITHUB_OWNER);
             console.log('- Repo detected:', GITHUB_REPO);
-            console.log('- Token configured:', GITHUB_TOKEN !== 'YOUR_TEAM_TOKEN_HERE');
-            console.log('- Token starts with ghp_:', GITHUB_TOKEN.startsWith('ghp_'));
-            
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_TEAM_TOKEN_HERE') {
-                throw new Error('Team GitHub token not configured. Please see setup instructions in the code.');
-            }
+            console.log('- Token configured:', !!GITHUB_TOKEN);
+            console.log('- Token length:', GITHUB_TOKEN ? GITHUB_TOKEN.length : 0);
             
             showStatus('Testing GitHub connection...', 'warning');
             
@@ -1047,7 +1062,9 @@
                 if (repoResponse.status === 404) {
                     throw new Error(`Repository not found: ${GITHUB_OWNER}/${GITHUB_REPO}. Please check the username and repository name.`);
                 } else if (repoResponse.status === 401) {
-                    throw new Error('Token authentication failed. Please check your GitHub token has correct permissions.');
+                    // Clear the stored token and ask for a new one
+                    localStorage.removeItem('cedars_github_token');
+                    throw new Error('Token authentication failed. Please refresh the page and enter a valid token.');
                 } else if (!repoResponse.ok) {
                     throw new Error(`Repository access failed: ${repoResponse.status}`);
                 }
@@ -1069,6 +1086,9 @@
                 
                 if (response.status === 404) {
                     throw new Error(`File not found: ${DATA_FILE_PATH}. Make sure data.json exists in your repository.`);
+                } else if (response.status === 401) {
+                    localStorage.removeItem('cedars_github_token');
+                    throw new Error('Token expired or revoked. Please refresh the page and enter a new token.');
                 } else if (!response.ok) {
                     const errorText = await response.text();
                     console.log('Error response:', errorText);
@@ -1122,8 +1142,8 @@
         }
         
         async function saveToGitHub() {
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_TEAM_TOKEN_HERE') {
-                showStatus('Team GitHub token not configured. Please see setup instructions.', 'error');
+            if (!GITHUB_TOKEN) {
+                showStatus('GitHub token required. Please refresh to enter token.', 'error');
                 return;
             }
             
@@ -1158,7 +1178,10 @@
                     body: JSON.stringify(requestBody)
                 });
                 
-                if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem('cedars_github_token');
+                    throw new Error('Token expired or revoked. Please refresh the page and enter a new token.');
+                } else if (!response.ok) {
                     throw new Error(`GitHub API error: ${response.status} - Check token permissions`);
                 }
                 
