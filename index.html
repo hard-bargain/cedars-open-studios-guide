@@ -970,7 +970,7 @@
             if (hostname.includes('github.io')) {
                 return hostname.split('.')[0];
             }
-            return 'hard-bargain'; // fallback - update this with your GitHub username
+            return 'hard-bargain'; // Update this with your actual GitHub username if auto-detection fails
         }
         
         function getRepoName() {
@@ -1014,22 +1014,65 @@
         }
         
         async function loadFromGitHub() {
+            // Diagnostic logging
+            console.log('=== GitHub Configuration Diagnostics ===');
+            console.log('Current URL:', window.location.href);
+            console.log('Hostname:', window.location.hostname);
+            console.log('Pathname:', window.location.pathname);
+            console.log('- Owner detected:', GITHUB_OWNER);
+            console.log('- Repo detected:', GITHUB_REPO);
+            console.log('- Token configured:', GITHUB_TOKEN !== 'YOUR_TEAM_TOKEN_HERE');
+            console.log('- Token starts with ghp_:', GITHUB_TOKEN.startsWith('ghp_'));
+            
             if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_TEAM_TOKEN_HERE') {
                 throw new Error('Team GitHub token not configured. Please see setup instructions in the code.');
             }
             
-            showStatus('Loading from GitHub...', 'warning');
+            showStatus('Testing GitHub connection...', 'warning');
+            
+            // First, let's test if we can access the repository at all
+            const repoUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
+            console.log('Testing repository access:', repoUrl);
             
             try {
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`, {
+                const repoResponse = await fetch(repoUrl, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status} - Check token permissions and repository access`);
+                console.log('Repository test status:', repoResponse.status);
+                
+                if (repoResponse.status === 404) {
+                    throw new Error(`Repository not found: ${GITHUB_OWNER}/${GITHUB_REPO}. Please check the username and repository name.`);
+                } else if (repoResponse.status === 401) {
+                    throw new Error('Token authentication failed. Please check your GitHub token has correct permissions.');
+                } else if (!repoResponse.ok) {
+                    throw new Error(`Repository access failed: ${repoResponse.status}`);
+                }
+                
+                console.log('✓ Repository access successful');
+                
+                // Now test the data file
+                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`;
+                console.log('Testing file access:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                console.log('File access status:', response.status);
+                
+                if (response.status === 404) {
+                    throw new Error(`File not found: ${DATA_FILE_PATH}. Make sure data.json exists in your repository.`);
+                } else if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log('Error response:', errorText);
+                    throw new Error(`File access failed: ${response.status} - ${errorText}`);
                 }
                 
                 const fileData = await response.json();
@@ -1044,6 +1087,7 @@
                 
             } catch (error) {
                 console.error('GitHub load error:', error);
+                showStatus(`Connection failed: ${error.message}`, 'error');
                 throw error;
             }
         }
