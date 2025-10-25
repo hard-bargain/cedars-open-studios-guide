@@ -1332,7 +1332,14 @@
                 document.getElementById('mapViewBtn').classList.add('active');
                 document.getElementById('listViewBtn').classList.remove('active');
                 document.getElementById('legendBtn').style.display = 'block';
-                setTimeout(() => map && map.invalidateSize(), 100);
+                
+                // Refresh any open popups to sync with current state
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                        refreshAllOpenPopups();
+                    }
+                }, 100);
             } else {
                 document.getElementById('map').style.display = 'none';
                 document.getElementById('mapLegend').classList.remove('show');
@@ -1342,6 +1349,36 @@
                 document.getElementById('legendBtn').style.display = 'none';
                 updateListView();
             }
+        }
+        
+        function refreshAllOpenPopups() {
+            // Find any currently open popups and refresh their content
+            Object.keys(markers).forEach(studioNum => {
+                const marker = markers[parseInt(studioNum)];
+                if (marker && marker.isPopupOpen()) {
+                    refreshSinglePopup(parseInt(studioNum));
+                }
+            });
+        }
+        
+        function refreshSinglePopup(studioNum) {
+            const studio = studios.find(s => s.num === studioNum);
+            if (!studio) return;
+            
+            const marker = markers[studioNum];
+            if (!marker || !marker.isPopupOpen()) return;
+            
+            // Determine the route order for this studio
+            const includedStudios = studios.filter(s => !skippedStudios.has(s.num));
+            const routeOrder = calculateOptimalRoute(includedStudios);
+            const routeIndex = routeOrder.findIndex(s => s.num === studioNum);
+            const routeNum = routeIndex >= 0 ? routeIndex + 1 : null;
+            
+            // Generate new popup content with current state
+            const newContent = createPopupContent(studio, routeNum);
+            
+            // Update the popup content
+            marker.setPopupContent(newContent);
         }
         
         function toggleLegend() {
@@ -1428,6 +1465,8 @@
         function updateAllViews() {
             updateRoute();
             updateListView();
+            // Also refresh any open popups to keep them in sync
+            refreshAllOpenPopups();
         }
         
         function createPopupContent(studio, routeOrder) {
