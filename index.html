@@ -902,17 +902,17 @@
         <div class="github-controls">
             <h3>
                 <span class="material-icons" style="font-size: 20px;">cloud</span>
-                Auto-Save to GitHub
+                Team Route Sync
             </h3>
             <button id="saveBtn" onclick="saveToGitHub()">
                 <span class="material-icons" style="font-size: 18px; vertical-align: middle;">save</span>
-                Save Your Route
+                Save Team Route
             </button>
             <button id="loadBtn" onclick="loadFromGitHub()">
                 <span class="material-icons" style="font-size: 18px; vertical-align: middle;">refresh</span>
                 Load Latest
             </button>
-            <div class="status" id="statusMessage">Your route changes are automatically saved to GitHub</div>
+            <div class="status" id="statusMessage">Team route changes are automatically shared with all collaborators</div>
         </div>
     </div>
     
@@ -953,10 +953,15 @@
         let tourData = null;
         let studios = [];
         
-        // GitHub configuration - these will be set dynamically
+        // GitHub configuration - Team token approach
         const GITHUB_OWNER = getRepoOwner();
         const GITHUB_REPO = getRepoName();
-        const GITHUB_TOKEN = getGitHubToken();
+        
+        // TEAM CONFIGURATION: Set your shared GitHub token here
+        // To set up: 1) Create Personal Access Token with 'repo' permissions
+        //           2) Replace 'YOUR_TEAM_TOKEN_HERE' with your actual token
+        //           3) Commit and deploy - all team members get automatic access
+        const GITHUB_TOKEN = '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';
         const DATA_FILE_PATH = 'data.json';
         
         function getRepoOwner() {
@@ -965,7 +970,7 @@
             if (hostname.includes('github.io')) {
                 return hostname.split('.')[0];
             }
-            return 'your-username'; // fallback
+            return 'your-username'; // fallback - update this with your GitHub username
         }
         
         function getRepoName() {
@@ -974,20 +979,7 @@
             if (pathname.length > 1) {
                 return pathname.split('/')[1];
             }
-            return 'cedars-open-studios-guide'; // fallback
-        }
-        
-        function getGitHubToken() {
-            // In production, this should be handled securely
-            // For now, we'll try localStorage first, then prompt user
-            let token = localStorage.getItem('github_token');
-            if (!token) {
-                token = prompt('Please enter your GitHub Personal Access Token for auto-save functionality:');
-                if (token) {
-                    localStorage.setItem('github_token', token);
-                }
-            }
-            return token;
+            return 'cedars-open-studios-guide'; // fallback - update if your repo name differs
         }
         
         // Initialize the application
@@ -1022,8 +1014,8 @@
         }
         
         async function loadFromGitHub() {
-            if (!GITHUB_TOKEN) {
-                throw new Error('No GitHub token available');
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_TEAM_TOKEN_HERE') {
+                throw new Error('Team GitHub token not configured. Please see setup instructions in the code.');
             }
             
             showStatus('Loading from GitHub...', 'warning');
@@ -1037,7 +1029,7 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status}`);
+                    throw new Error(`GitHub API error: ${response.status} - Check token permissions and repository access`);
                 }
                 
                 const fileData = await response.json();
@@ -1086,8 +1078,8 @@
         }
         
         async function saveToGitHub() {
-            if (!GITHUB_TOKEN) {
-                showStatus('GitHub token required for saving', 'error');
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_TEAM_TOKEN_HERE') {
+                showStatus('Team GitHub token not configured. Please see setup instructions.', 'error');
                 return;
             }
             
@@ -1123,7 +1115,7 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status}`);
+                    throw new Error(`GitHub API error: ${response.status} - Check token permissions`);
                 }
                 
                 const result = await response.json();
@@ -1141,7 +1133,7 @@
         
         // Auto-save functionality
         function autoSave() {
-            if (GITHUB_TOKEN) {
+            if (GITHUB_TOKEN && GITHUB_TOKEN !== 'YOUR_TEAM_TOKEN_HERE') {
                 setTimeout(() => saveToGitHub(), 1000); // Debounce saves
             }
         }
