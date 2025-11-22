@@ -870,7 +870,7 @@
 <body>
     <div id="loading">
         <div>Loading tour data...</div>
-        <div style="font-size: 14px; margin-top: 8px;">Fetching from GitHub...</div>
+        <div style="font-size: 14px; margin-top: 8px;">Connecting...</div>
     </div>
     
     <div class="view-toggle">
@@ -920,17 +920,9 @@
         <div class="github-controls">
             <h3>
                 <span class="material-icons" style="font-size: 20px;">cloud</span>
-                Team Route Sync
+                Your Progress
             </h3>
-            <button id="saveBtn" onclick="saveToGitHub()">
-                <span class="material-icons" style="font-size: 18px; vertical-align: middle;">save</span>
-                Save Team Route
-            </button>
-            <button id="loadBtn" onclick="loadFromGitHub()">
-                <span class="material-icons" style="font-size: 18px; vertical-align: middle;">refresh</span>
-                Load Latest
-            </button>
-            <div class="status" id="statusMessage">Team route changes are automatically shared with all collaborators</div>
+            <div class="status" id="statusMessage">Your progress is automatically saved</div>
         </div>
     </div>
     
@@ -959,7 +951,22 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // ============================================
+        // SUPABASE CONFIGURATION
+        // ============================================
+        // IMPORTANT: Replace these with your Supabase project credentials
+        // Find them at: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // e.g., 'https://xxxxx.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Public anon key (safe to expose)
+
+        // Initialize Supabase client
+        let supabase = null;
+        let currentUser = null;
+        let currentTour = null;
+        let locationIdMap = {}; // Maps location num to UUID
+
         // Global variables
         let map;
         let markers = {};
@@ -967,260 +974,316 @@
         let skippedStudios = new Set();
         let favoritedStudios = new Set();
         let visitedStudios = new Set();
+        let userNotes = {}; // locationId -> note
+        let userRatings = {}; // locationId -> rating (1-5)
         let currentView = 'map';
         let tourData = null;
         let studios = [];
-        
-        // GitHub configuration - Environment variable approach (secure)
-        const GITHUB_OWNER = getRepoOwner();
-        const GITHUB_REPO = getRepoName();
-        
-        // SECURE CONFIGURATION: Token loaded from environment or prompt
-        // This prevents GitHub from detecting and auto-deleting the token
-        function getGitHubToken() {
-            // Try environment variable first (for deployment)
-            if (typeof process !== 'undefined' && process.env && process.env.GITHUB_TOKEN) {
-                return process.env.GITHUB_TOKEN;
-            }
-            
-            // Try localStorage (preserved across sessions)
-            let token = localStorage.getItem('cedars_github_token');
-            if (!token) {
-                token = prompt(`🔑 GitHub Token Setup\n\nTo enable route sharing:\n1. Go to github.com/settings/tokens\n2. Create token with 'repo' permissions\n3. Enter token below:\n\n(This will be saved for future use)`);
-                if (token) {
-                    localStorage.setItem('cedars_github_token', token);
-                }
-            }
-            return token;
+
+        // Check if Supabase is configured
+        function isSupabaseConfigured() {
+            return SUPABASE_URL !== 'YOUR_SUPABASE_URL' &&
+                   SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY' &&
+                   SUPABASE_URL.includes('supabase.co');
         }
-        
-        const GITHUB_TOKEN = getGitHubToken();
-        const DATA_FILE_PATH = 'data.json';
-        
-        function getRepoOwner() {
-            // Extract from current URL or default
-            const hostname = window.location.hostname;
-            if (hostname.includes('github.io')) {
-                return hostname.split('.')[0];
-            }
-            return 'hard-bargain'; // Update this with your actual GitHub username if auto-detection fails
-        }
-        
-        function getRepoName() {
-            // Extract from current URL or default
-            const pathname = window.location.pathname;
-            if (pathname.length > 1) {
-                return pathname.split('/')[1];
-            }
-            return 'cedars-open-studios-guide'; // fallback - update if your repo name differs
-        }
-        
+
         // Initialize the application
         async function initializeApp() {
             if (typeof L === 'undefined') {
                 setTimeout(initializeApp, 100);
                 return;
             }
-            
-            try {
-                await loadFromGitHub();
-                initializeMap();
-            } catch (error) {
-                console.error('Failed to load from GitHub:', error);
-                showStatus('Failed to load data from GitHub. Using default data.', 'error');
-                // Load default data as fallback
+
+            // Check if Supabase is configured
+            if (isSupabaseConfigured()) {
+                try {
+                    await initializeSupabase();
+                    await loadFromSupabase();
+                    initializeMap();
+                    showStatus('Connected', 'success');
+                } catch (error) {
+                    console.error('Supabase error:', error);
+                    showStatus('Using offline mode', 'warning');
+                    await loadDefaultData();
+                    initializeMap();
+                }
+            } else {
+                // Fall back to local data.json (no Supabase configured)
+                console.log('Supabase not configured, using local data');
                 await loadDefaultData();
                 initializeMap();
+                showStatus('Offline mode - configure Supabase for cloud sync', 'warning');
             }
         }
-        
+
+        async function initializeSupabase() {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // Sign in anonymously - creates a session without requiring user credentials
+            const { data, error } = await supabase.auth.signInAnonymously();
+
+            if (error) {
+                console.error('Anonymous auth error:', error);
+                throw error;
+            }
+
+            currentUser = data.user;
+            console.log('Signed in anonymously:', currentUser.id);
+        }
+
+        async function loadFromSupabase() {
+            if (!supabase || !currentUser) {
+                throw new Error('Supabase not initialized');
+            }
+
+            // Load active tour
+            const { data: tours, error: tourError } = await supabase
+                .from('tours')
+                .select('*')
+                .eq('is_active', true)
+                .limit(1);
+
+            if (tourError) throw tourError;
+            if (!tours || tours.length === 0) {
+                throw new Error('No active tour found');
+            }
+
+            currentTour = tours[0];
+
+            // Load locations for this tour
+            const { data: locations, error: locError } = await supabase
+                .from('locations')
+                .select('*')
+                .eq('tour_id', currentTour.id)
+                .order('num');
+
+            if (locError) throw locError;
+
+            // Build location ID map and convert to expected format
+            studios = locations.map(loc => {
+                locationIdMap[loc.num] = loc.id;
+                return {
+                    num: loc.num,
+                    name: loc.name,
+                    address: loc.address,
+                    medium: loc.medium,
+                    description: loc.description,
+                    website: loc.website,
+                    lat: parseFloat(loc.lat),
+                    lon: parseFloat(loc.lon),
+                    isStart: loc.is_start,
+                    _id: loc.id
+                };
+            });
+
+            // Load user's visits/preferences
+            const { data: visits, error: visitError } = await supabase
+                .from('user_visits')
+                .select('*')
+                .eq('user_id', currentUser.id);
+
+            if (!visitError && visits) {
+                visits.forEach(visit => {
+                    const locNum = Object.keys(locationIdMap).find(
+                        num => locationIdMap[num] === visit.location_id
+                    );
+                    if (locNum) {
+                        const num = parseInt(locNum);
+                        if (visit.visited) visitedStudios.add(num);
+                        if (visit.skipped) skippedStudios.add(num);
+                        if (visit.favorited) favoritedStudios.add(num);
+                    }
+                });
+            }
+
+            // Load user's notes
+            const { data: notes, error: notesError } = await supabase
+                .from('user_notes')
+                .select('*')
+                .eq('user_id', currentUser.id);
+
+            if (!notesError && notes) {
+                notes.forEach(note => {
+                    const locNum = Object.keys(locationIdMap).find(
+                        num => locationIdMap[num] === note.location_id
+                    );
+                    if (locNum && note.note) {
+                        userNotes[parseInt(locNum)] = note.note;
+                    }
+                });
+            }
+
+            // Load user's ratings
+            const { data: ratings, error: ratingsError } = await supabase
+                .from('user_ratings')
+                .select('*')
+                .eq('user_id', currentUser.id);
+
+            if (!ratingsError && ratings) {
+                ratings.forEach(rating => {
+                    const locNum = Object.keys(locationIdMap).find(
+                        num => locationIdMap[num] === rating.location_id
+                    );
+                    if (locNum && rating.rating) {
+                        userRatings[parseInt(locNum)] = rating.rating;
+                    }
+                });
+            }
+
+            // Update UI
+            updateTourConfig();
+        }
+
+        function updateTourConfig() {
+            if (currentTour) {
+                document.getElementById('eventDate').textContent =
+                    `${currentTour.date || 'November 22, 2025'} | ${currentTour.hours || '11 AM - 6 PM'}`;
+            }
+            // Hide placeholder notice since we have real data
+            document.getElementById('placeholderNotice').style.display = 'none';
+        }
+
         async function loadDefaultData() {
-            // If GitHub fails, load from local data.json
+            // Fall back to local data.json
             try {
                 const response = await fetch('./data.json');
                 tourData = await response.json();
-                processLoadedData();
+                studios = tourData.studios || [];
+
+                // Load from localStorage for offline use
+                const savedState = localStorage.getItem('cedars_user_state');
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    skippedStudios = new Set(state.skippedStudios || []);
+                    favoritedStudios = new Set(state.favoritedStudios || []);
+                    visitedStudios = new Set(state.visitedStudios || []);
+                    userNotes = state.userNotes || {};
+                    userRatings = state.userRatings || {};
+                }
+
+                // Update UI
+                if (tourData.tourConfig) {
+                    document.getElementById('eventDate').textContent =
+                        `${tourData.tourConfig.date || 'November 22, 2025'} | ${tourData.tourConfig.hours || '11 AM - 6 PM'}`;
+
+                    const placeholderNotice = document.getElementById('placeholderNotice');
+                    placeholderNotice.style.display = tourData.tourConfig.isPlaceholder ? 'block' : 'none';
+                }
             } catch (error) {
                 console.error('Failed to load default data:', error);
                 showStatus('Failed to load tour data', 'error');
             }
         }
-        
-        async function loadFromGitHub() {
-            if (!GITHUB_TOKEN) {
-                throw new Error('GitHub token required. Please refresh and enter your token when prompted.');
-            }
-            
-            // Diagnostic logging
-            console.log('=== GitHub Configuration Diagnostics ===');
-            console.log('Current URL:', window.location.href);
-            console.log('Hostname:', window.location.hostname);
-            console.log('Pathname:', window.location.pathname);
-            console.log('- Owner detected:', GITHUB_OWNER);
-            console.log('- Repo detected:', GITHUB_REPO);
-            console.log('- Token configured:', !!GITHUB_TOKEN);
-            console.log('- Token length:', GITHUB_TOKEN ? GITHUB_TOKEN.length : 0);
-            
-            showStatus('Testing GitHub connection...', 'warning');
-            
-            // First, let's test if we can access the repository at all
-            const repoUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
-            console.log('Testing repository access:', repoUrl);
-            
-            try {
-                const repoResponse = await fetch(repoUrl, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                console.log('Repository test status:', repoResponse.status);
-                
-                if (repoResponse.status === 404) {
-                    throw new Error(`Repository not found: ${GITHUB_OWNER}/${GITHUB_REPO}. Please check the username and repository name.`);
-                } else if (repoResponse.status === 401) {
-                    // Clear the stored token and ask for a new one
-                    localStorage.removeItem('cedars_github_token');
-                    throw new Error('Token authentication failed. Please refresh the page and enter a valid token.');
-                } else if (!repoResponse.ok) {
-                    throw new Error(`Repository access failed: ${repoResponse.status}`);
-                }
-                
-                console.log('✓ Repository access successful');
-                
-                // Now test the data file
-                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`;
-                console.log('Testing file access:', apiUrl);
-                
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                console.log('File access status:', response.status);
-                
-                if (response.status === 404) {
-                    throw new Error(`File not found: ${DATA_FILE_PATH}. Make sure data.json exists in your repository.`);
-                } else if (response.status === 401) {
-                    localStorage.removeItem('cedars_github_token');
-                    throw new Error('Token expired or revoked. Please refresh the page and enter a new token.');
-                } else if (!response.ok) {
-                    const errorText = await response.text();
-                    console.log('Error response:', errorText);
-                    throw new Error(`File access failed: ${response.status} - ${errorText}`);
-                }
-                
-                const fileData = await response.json();
-                const content = atob(fileData.content);
-                tourData = JSON.parse(content);
-                
-                // Store the sha for future updates
-                tourData._sha = fileData.sha;
-                
-                processLoadedData();
-                showStatus('✓ Loaded from GitHub', 'success');
-                
-            } catch (error) {
-                console.error('GitHub load error:', error);
-                showStatus(`Connection failed: ${error.message}`, 'error');
-                throw error;
-            }
-        }
-        
-        function processLoadedData() {
-            if (!tourData) return;
-            
-            studios = tourData.studios || [];
-            
-            // Load user state
-            if (tourData.userState) {
-                skippedStudios = new Set(tourData.userState.skippedStudios || []);
-                favoritedStudios = new Set(tourData.userState.favoritedStudios || []);
-                visitedStudios = new Set(tourData.userState.visitedStudios || []);
-            }
-            
-            // Update UI with tour config
-            if (tourData.tourConfig) {
-                const config = tourData.tourConfig;
-                
-                // Update event date
-                document.getElementById('eventDate').textContent = `${config.date || 'November 22, 2025'} | ${config.hours || '11 AM - 6 PM'}`;
-                
-                // Show placeholder notice if needed
-                const placeholderNotice = document.getElementById('placeholderNotice');
-                if (config.isPlaceholder) {
-                    placeholderNotice.style.display = 'block';
-                } else {
-                    placeholderNotice.style.display = 'none';
-                }
-            }
-        }
-        
-        async function saveToGitHub() {
-            if (!GITHUB_TOKEN) {
-                showStatus('GitHub token required. Please refresh to enter token.', 'error');
+
+        async function saveUserVisit(locationNum, visited, skipped, favorited) {
+            if (!isSupabaseConfigured() || !supabase || !currentUser) {
+                // Save to localStorage as fallback
+                saveToLocalStorage();
                 return;
             }
-            
-            showStatus('Saving to GitHub...', 'warning');
-            document.getElementById('saveBtn').disabled = true;
-            
+
+            const locationId = locationIdMap[locationNum];
+            if (!locationId) return;
+
             try {
-                // Update user state in tour data
-                if (!tourData.userState) tourData.userState = {};
-                tourData.userState.skippedStudios = Array.from(skippedStudios);
-                tourData.userState.favoritedStudios = Array.from(favoritedStudios);
-                tourData.userState.visitedStudios = Array.from(visitedStudios);
-                tourData.lastUpdated = new Date().toISOString();
-                
-                // Prepare the content
-                const content = JSON.stringify(tourData, null, 2);
-                const encodedContent = btoa(content);
-                
-                const requestBody = {
-                    message: `Update tour route - ${new Date().toLocaleString()}`,
-                    content: encodedContent,
-                    sha: tourData._sha
-                };
-                
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                if (response.status === 401) {
-                    localStorage.removeItem('cedars_github_token');
-                    throw new Error('Token expired or revoked. Please refresh the page and enter a new token.');
-                } else if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status} - Check token permissions`);
-                }
-                
-                const result = await response.json();
-                tourData._sha = result.content.sha;
-                
-                showStatus('✓ Saved to GitHub', 'success');
-                
+                const { error } = await supabase
+                    .from('user_visits')
+                    .upsert({
+                        user_id: currentUser.id,
+                        location_id: locationId,
+                        visited: visited,
+                        skipped: skipped,
+                        favorited: favorited
+                    }, {
+                        onConflict: 'user_id,location_id'
+                    });
+
+                if (error) throw error;
             } catch (error) {
-                console.error('GitHub save error:', error);
-                showStatus(`Save failed: ${error.message}`, 'error');
-            } finally {
-                document.getElementById('saveBtn').disabled = false;
+                console.error('Error saving visit:', error);
+                saveToLocalStorage();
             }
         }
-        
-        // Auto-save functionality
-        function autoSave() {
-            if (GITHUB_TOKEN && GITHUB_TOKEN !== 'YOUR_TEAM_TOKEN_HERE') {
-                setTimeout(() => saveToGitHub(), 1000); // Debounce saves
+
+        async function saveUserNote(locationNum, note) {
+            if (!isSupabaseConfigured() || !supabase || !currentUser) {
+                userNotes[locationNum] = note;
+                saveToLocalStorage();
+                return;
             }
+
+            const locationId = locationIdMap[locationNum];
+            if (!locationId) return;
+
+            try {
+                const { error } = await supabase
+                    .from('user_notes')
+                    .upsert({
+                        user_id: currentUser.id,
+                        location_id: locationId,
+                        note: note
+                    }, {
+                        onConflict: 'user_id,location_id'
+                    });
+
+                if (error) throw error;
+                userNotes[locationNum] = note;
+            } catch (error) {
+                console.error('Error saving note:', error);
+                userNotes[locationNum] = note;
+                saveToLocalStorage();
+            }
+        }
+
+        async function saveUserRating(locationNum, rating) {
+            if (!isSupabaseConfigured() || !supabase || !currentUser) {
+                userRatings[locationNum] = rating;
+                saveToLocalStorage();
+                return;
+            }
+
+            const locationId = locationIdMap[locationNum];
+            if (!locationId) return;
+
+            try {
+                const { error } = await supabase
+                    .from('user_ratings')
+                    .upsert({
+                        user_id: currentUser.id,
+                        location_id: locationId,
+                        rating: rating
+                    }, {
+                        onConflict: 'user_id,location_id'
+                    });
+
+                if (error) throw error;
+                userRatings[locationNum] = rating;
+            } catch (error) {
+                console.error('Error saving rating:', error);
+                userRatings[locationNum] = rating;
+                saveToLocalStorage();
+            }
+        }
+
+        function saveToLocalStorage() {
+            const state = {
+                skippedStudios: Array.from(skippedStudios),
+                favoritedStudios: Array.from(favoritedStudios),
+                visitedStudios: Array.from(visitedStudios),
+                userNotes: userNotes,
+                userRatings: userRatings
+            };
+            localStorage.setItem('cedars_user_state', JSON.stringify(state));
+        }
+
+        // Auto-save functionality
+        let saveTimeout = null;
+        function autoSave() {
+            // Debounce saves
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToLocalStorage();
+            }, 500);
         }
         
         function initializeMap() {
@@ -1439,9 +1502,16 @@
                 skippedStudios.add(studioNum);
             }
             updateAllViews();
+            // Save to Supabase
+            saveUserVisit(
+                studioNum,
+                visitedStudios.has(studioNum),
+                skippedStudios.has(studioNum),
+                favoritedStudios.has(studioNum)
+            );
             autoSave();
         }
-        
+
         function toggleFavorite(studioNum) {
             if (favoritedStudios.has(studioNum)) {
                 favoritedStudios.delete(studioNum);
@@ -1449,9 +1519,16 @@
                 favoritedStudios.add(studioNum);
             }
             updateAllViews();
+            // Save to Supabase
+            saveUserVisit(
+                studioNum,
+                visitedStudios.has(studioNum),
+                skippedStudios.has(studioNum),
+                favoritedStudios.has(studioNum)
+            );
             autoSave();
         }
-        
+
         function toggleVisited(studioNum) {
             if (visitedStudios.has(studioNum)) {
                 visitedStudios.delete(studioNum);
@@ -1459,6 +1536,13 @@
                 visitedStudios.add(studioNum);
             }
             updateAllViews();
+            // Save to Supabase
+            saveUserVisit(
+                studioNum,
+                visitedStudios.has(studioNum),
+                skippedStudios.has(studioNum),
+                favoritedStudios.has(studioNum)
+            );
             autoSave();
         }
         
@@ -1713,10 +1797,10 @@
             if (type !== 'default') {
                 statusEl.classList.add(type);
             }
-            
+
             if (type === 'success' || type === 'error') {
                 setTimeout(function() {
-                    statusEl.textContent = 'Your route changes are automatically saved to GitHub';
+                    statusEl.textContent = 'Your progress is automatically saved';
                     statusEl.className = 'status';
                 }, 3000);
             }
