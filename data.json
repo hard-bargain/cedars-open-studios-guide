@@ -5,289 +5,379 @@
     "hours": "11 AM - 6 PM",
     "description": "A beloved tradition for more than two decades! Wander through artists' studios, galleries, businesses, and creative spaces in the historic Cedars neighborhood.",
     "website": "https://www.cedarsopenstudios.org/",
-    "isPlaceholder": true,
-    "placeholderNote": "Currently using White Rock Lake data as placeholder until Cedars tour locations are published"
+    "isPlaceholder": false
   },
   "studios": [
     {
-      "num": 33,
-      "name": "Janice Somerville",
-      "address": "10010 Northcliff Dr, Dallas, TX",
-      "medium": "pottery, fused glass, assemblage",
-      "website": "https://instagram.com/potterybyjanice",
-      "lat": 32.8521,
-      "lon": -96.7089,
+      "num": 1,
+      "name": "CANVAS Hotel Dallas",
+      "address": "1325 Botham Jean Blvd, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "https://www.canvashoteldallas.com/",
+      "lat": 32.7785,
+      "lon": -96.8000,
       "isStart": true
     },
     {
+      "num": 2,
+      "name": "South Side On Lamar",
+      "address": "1409 Botham Jean Blvd, Dallas, TX",
+      "medium": "sponsor - Information, Artist Quarter & Basement",
+      "description": "Information, Artist Quarter & Basement",
+      "website": "",
+      "lat": 32.7765,
+      "lon": -96.8000
+    },
+    {
+      "num": 3,
+      "name": "Eros Artspace",
+      "address": "1409 Botham Jean Blvd, Artist Quarter 103, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7765,
+      "lon": -96.7998
+    },
+    {
+      "num": 4,
+      "name": "SPARK!",
+      "address": "1409 Botham Jean Blvd, Southside on Lamar Basement, Dallas, TX",
+      "medium": "sponsor",
+      "description": "Southside on Lamar Basement",
+      "website": "",
+      "lat": 32.7765,
+      "lon": -96.7996
+    },
+    {
       "num": 5,
-      "name": "Ann Alford Ceramics",
-      "address": "459 Kirkwood Dr, Dallas, TX",
-      "medium": "hand-thrown, altered porcelain",
-      "website": "http://www.annalfordceramics.com",
-      "lat": 32.8498,
-      "lon": -96.7125
-    },
-    {
-      "num": 8,
-      "name": "Both Hands Studio",
-      "address": "1810 West Shore Dr, Dallas, TX",
-      "medium": "handmade ceramics",
-      "website": "http://www.bothhandsstudio.com",
-      "lat": 32.8612,
-      "lon": -96.7243
-    },
-    {
-      "num": 18,
-      "name": "Beverly Gadient",
-      "address": "1106 Cameron Ave, Dallas, TX",
-      "medium": "fused glass creations",
-      "website": null,
-      "lat": 32.8642,
-      "lon": -96.7189
-    },
-    {
-      "num": 10,
-      "name": "Glo Coalson",
-      "address": "8247 Barbaree Blvd, Dallas, TX",
-      "medium": "sculpture",
-      "website": null,
-      "lat": 32.8389,
-      "lon": -96.6892
-    },
-    {
-      "num": 7,
-      "name": "Rebecca & Ken Boatman",
-      "address": "8207 Barbaree Blvd, Dallas, TX",
-      "medium": "yard art, metal, clay",
-      "website": "https://rebeccaboatman.com",
-      "lat": 32.8385,
-      "lon": -96.6897
-    },
-    {
-      "num": 30,
-      "name": "Marty & Richard Ray",
-      "address": "8166 Barbaree Blvd, Dallas, TX",
-      "medium": "incised pottery & paintings",
-      "website": "https://martyray.com",
-      "lat": 32.8378,
-      "lon": -96.6903
-    },
-    {
-      "num": 25,
-      "name": "Larry Paul Jones",
-      "address": "8244 Barbaree Blvd, Dallas, TX",
-      "medium": "painting & sculpture",
-      "website": null,
-      "lat": 32.8388,
-      "lon": -96.6893
-    },
-    {
-      "num": 26,
-      "name": "Chris Lyons",
-      "address": "8255 Barbaree Blvd, Dallas, TX",
-      "medium": "wood and stone sculpture",
-      "website": null,
-      "lat": 32.8391,
-      "lon": -96.6891
-    },
-    {
-      "num": 14,
-      "name": "Dawn Edelman",
-      "address": "8706 Santa Clara Dr, Dallas, TX",
-      "medium": "figurative works",
-      "website": "https://www.instagram.com/dawnedelmanfigures",
-      "lat": 32.8423,
-      "lon": -96.6845
-    },
-    {
-      "num": 27,
-      "name": "Michael O'Keefe",
-      "address": "8903 Santa Clara Dr, Dallas, TX",
-      "medium": "figurative art",
-      "website": "http://michaelokeefestudio.com",
-      "lat": 32.8445,
-      "lon": -96.6823
-    },
-    {
-      "num": 12,
-      "name": "Connie Chantilis Design",
-      "address": "8718 Daytonia Ave, Dallas, TX",
-      "medium": "minerals, mosaic, fused glass",
-      "website": "https://www.conniechantilisdesign.com",
-      "lat": 32.8412,
-      "lon": -96.6856
-    },
-    {
-      "num": 13,
-      "name": "Marc Dominus Artist",
-      "address": "8813 Diceman Dr, Dallas, TX",
-      "medium": "abstract art",
-      "website": "https://marcdominus.com",
-      "lat": 32.8421,
-      "lon": -96.6834
-    },
-    {
-      "num": 9,
-      "name": "Logan René Broussard",
-      "address": "1114 Sarasota Circle, Dallas, TX",
-      "medium": "sculpture, painting, weaving",
-      "website": "https://artbyloganrene.com",
-      "lat": 32.8467,
-      "lon": -96.6798
-    },
-    {
-      "num": 15,
-      "name": "Lynn Eskridge",
-      "address": "8707 Thunderbird Ln, Dallas, TX",
-      "medium": "acrylic painting",
-      "website": null,
-      "lat": 32.8501,
-      "lon": -96.6801
-    },
-    {
-      "num": 20,
-      "name": "Woody Glenn",
-      "address": "8325 Forest Hills Blvd, Dallas, TX",
-      "medium": "woodworking, watercolors",
-      "website": "http://woodandwater.net",
-      "lat": 32.8356,
-      "lon": -96.6912
-    },
-    {
-      "num": 19,
-      "name": "Linda Gilpin",
-      "address": "8138 San Benito Way, Dallas, TX",
-      "medium": "fused glass jewelry",
-      "website": null,
-      "lat": 32.8334,
-      "lon": -96.6923
-    },
-    {
-      "num": 17,
-      "name": "Annie C. Foster",
-      "address": "8416 Suncrest Dr, Dallas, TX",
-      "medium": "ceramics",
-      "website": null,
-      "lat": 32.8367,
-      "lon": -96.6889
-    },
-    {
-      "num": 21,
-      "name": "Jim Hastings",
-      "address": "1239 N. Selva Dr, Dallas, TX",
-      "medium": "drawing, painting, prints",
-      "website": "http://instagram.com/jhastings40",
-      "lat": 32.8298,
-      "lon": -96.6956
-    },
-    {
-      "num": 16,
-      "name": "David Farrell Art",
-      "address": "9444 Sherwood Gln, Dallas, TX",
-      "medium": "mixed subjects",
-      "website": "http://www.davidfarrellart.com",
-      "lat": 32.8267,
-      "lon": -96.6734
-    },
-    {
-      "num": 11,
-      "name": "Nancy J. Cole",
-      "address": "9815 Carnegie Dr, Dallas, TX",
-      "medium": "clay art & paintings",
-      "website": null,
-      "lat": 32.8245,
-      "lon": -96.6812
-    },
-    {
-      "num": 22,
-      "name": "Jeff & Sigrun Hukill",
-      "address": "1844 Oates Dr, Dallas, TX",
-      "medium": "paintings/ceramics",
-      "website": "https://jeffhukillart.com",
-      "lat": 32.8212,
-      "lon": -96.6845
-    },
-    {
-      "num": 29,
-      "name": "Susan O'Neal",
-      "address": "2433 N. Buckner Blvd, Dallas, TX",
-      "medium": "artisan jewelry",
-      "website": null,
-      "lat": 32.8234,
-      "lon": -96.7023
-    },
-    {
-      "num": 23,
-      "name": "Jochum Family Pottery",
-      "address": "558 N. Buckner Blvd, Dallas, TX",
-      "medium": "wheel & hand-built pottery",
-      "website": null,
-      "lat": 32.8156,
-      "lon": -96.7067
-    },
-    {
-      "num": 24,
-      "name": "John & Erin's Place",
-      "address": "10627 Wood Dale Dr, Dallas, TX",
-      "medium": "ceramics",
-      "website": "https://erinmcsweeny.my.canva.site/john-erin-s-place",
-      "lat": 32.8089,
-      "lon": -96.6623
-    },
-    {
-      "num": 35,
-      "name": "Cecilia Thurman",
-      "address": "1433 Bella Vista Dr, Dallas, TX",
-      "medium": "printmaking, collage, painting",
-      "website": "http://ceciliathurmanart.com",
-      "lat": 32.8067,
-      "lon": -96.6734
-    },
-    {
-      "num": 31,
-      "name": "Lynn Rushton Reed",
-      "address": "7308 Rockhurst Dr, Dallas, TX",
-      "medium": "oil, watermedia, encaustics",
-      "website": "https://lynnrushton.com",
-      "lat": 32.8145,
-      "lon": -96.7234
-    },
-    {
-      "num": 32,
-      "name": "Sharon O'Callaghan Shero",
-      "address": "1418 Highland Rd, Dallas, TX",
-      "medium": "photomontage",
-      "website": "https://sharonocallaghanshero.com",
-      "lat": 32.8178,
-      "lon": -96.7289
-    },
-    {
-      "num": 28,
-      "name": "Alice O'Leary",
-      "address": "1702 Macmanus Dr, Dallas, TX",
-      "medium": "oil, watercolor, pastel",
-      "website": "http://aliceolearyart.com",
-      "lat": 32.8198,
-      "lon": -96.7345
-    },
-    {
-      "num": 34,
-      "name": "Silvia Thornton",
-      "address": "6426 Goliad Ave, Dallas, TX",
-      "medium": "cold wax, encaustic",
-      "website": "http://www.SilviaThornton.com",
-      "lat": 32.8567,
-      "lon": -96.7412
+      "name": "Opening Bell Coffee",
+      "address": "1409 Botham Jean Blvd, South Side On Lamar Basement, Dallas, TX",
+      "medium": "sponsor",
+      "description": "South Side On Lamar Basement",
+      "website": "",
+      "lat": 32.7765,
+      "lon": -96.7994
     },
     {
       "num": 6,
-      "name": "Art by Clara Johnson",
-      "address": "6041 N. Jim Miller Rd, Dallas, TX",
-      "medium": "silk, acrylic, watercolor",
-      "website": "https://www.facebook.com/ArtbyClaraJohnson",
-      "lat": 32.8234,
-      "lon": -96.7523
+      "name": "ACME Creation Lab",
+      "address": "1219 South Riverfront Blvd, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7755,
+      "lon": -96.8085
+    },
+    {
+      "num": 7,
+      "name": "Sandwich Hag & chimielnik Coffee Shop",
+      "address": "1902 Botham Jean Blvd, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7705,
+      "lon": -96.8000
+    },
+    {
+      "num": 8,
+      "name": "Autonomous Society",
+      "address": "1705 S. Akard Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7725,
+      "lon": -96.7965
+    },
+    {
+      "num": 9,
+      "name": "Full City Rooster",
+      "address": "1810 S. Akard Street, Suite 100, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7715,
+      "lon": -96.7965
+    },
+    {
+      "num": 10,
+      "name": "parmadesign",
+      "address": "1712 S. Akard Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7735,
+      "lon": -96.7965
+    },
+    {
+      "num": 11,
+      "name": "Lee Harvey's",
+      "address": "1807 Gould Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7720,
+      "lon": -96.7920
+    },
+    {
+      "num": 12,
+      "name": "Lee Harvey's Dive In",
+      "address": "1315 Beaumont Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7760,
+      "lon": -96.7905
+    },
+    {
+      "num": 13,
+      "name": "The Cedars Sage & Her Telling Typewriter",
+      "address": "1708 Gould Street, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7728,
+      "lon": -96.7920
+    },
+    {
+      "num": 14,
+      "name": "Cedars Art House",
+      "address": "1712 Gould Street, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7725,
+      "lon": -96.7920
+    },
+    {
+      "num": 15,
+      "name": "Movement Gallery",
+      "address": "1419 Beaumont Street, Suite 1, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7745,
+      "lon": -96.7905
+    },
+    {
+      "num": 16,
+      "name": "Preservation Dallas",
+      "address": "1419 Beaumont Street, Suite 1, Dallas, TX",
+      "medium": "sponsor - Information",
+      "description": "Information",
+      "website": "",
+      "lat": 32.7745,
+      "lon": -96.7903
+    },
+    {
+      "num": 17,
+      "name": "Glamour Puss Artistic Gallery",
+      "address": "1508 Beaumont Street, Dallas, TX",
+      "medium": "sponsor - Hair studio",
+      "description": "Hair studio",
+      "website": "",
+      "lat": 32.7735,
+      "lon": -96.7905
+    },
+    {
+      "num": 18,
+      "name": "The Powhattan House",
+      "address": "1214 Powhattan Street, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7775,
+      "lon": -96.7895
+    },
+    {
+      "num": 19,
+      "name": "Griffin Street Studios",
+      "address": "1204 Griffin Street West, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7780,
+      "lon": -96.7890
+    },
+    {
+      "num": 20,
+      "name": "Tin Ranch Studios",
+      "address": "1419 Griffin Street East, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7750,
+      "lon": -96.7885
+    },
+    {
+      "num": 21,
+      "name": "Cedars Union",
+      "address": "1219 S. Ervay Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7780,
+      "lon": -96.7935
+    },
+    {
+      "num": 22,
+      "name": "Four Corners Brewery",
+      "address": "1311 S. Ervay Street, Dallas, TX",
+      "medium": "sponsor - Food, Closing Show",
+      "description": "Food, Closing Show",
+      "website": "",
+      "lat": 32.7765,
+      "lon": -96.7935
+    },
+    {
+      "num": 23,
+      "name": "The Stewpot",
+      "address": "1311 S. Ervay Street, Dallas, TX",
+      "medium": "artist studio - Information",
+      "description": "Information",
+      "website": "",
+      "lat": 32.7765,
+      "lon": -96.7933
+    },
+    {
+      "num": 24,
+      "name": "City Park",
+      "address": "1515 S. Harwood Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7745,
+      "lon": -96.7875
+    },
+    {
+      "num": 25,
+      "name": "Avy's Sunshine Tribe",
+      "address": "1515 S. Harwood Street, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7745,
+      "lon": -96.7873
+    },
+    {
+      "num": 26,
+      "name": "Mesquite Arts Center",
+      "address": "1515 S. Harwood Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7745,
+      "lon": -96.7871
+    },
+    {
+      "num": 27,
+      "name": "Firefly Metal Works",
+      "address": "1507 Sullivan Drive, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7748,
+      "lon": -96.7865
+    },
+    {
+      "num": 28,
+      "name": "Marcello Andres Ceramics",
+      "address": "1501 Gano Street #3C, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "https://marcelloandres.com",
+      "lat": 32.7755,
+      "lon": -96.7880
+    },
+    {
+      "num": 29,
+      "name": "Gano Street Studios",
+      "address": "1517 Gano Street, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7750,
+      "lon": -96.7880
+    },
+    {
+      "num": 30,
+      "name": "Harmony Bank",
+      "address": "1900 South Ervay Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7695,
+      "lon": -96.7935
+    },
+    {
+      "num": 31,
+      "name": "Rule Six Studio",
+      "address": "2527 Gano Street, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7640,
+      "lon": -96.7880
+    },
+    {
+      "num": 32,
+      "name": "American Beauty Mill Lofts",
+      "address": "2400 S. Ervay Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7655,
+      "lon": -96.7935
+    },
+    {
+      "num": 33,
+      "name": "Mike's Gemini Twins",
+      "address": "1906 S. Harwood Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7695,
+      "lon": -96.7875
+    },
+    {
+      "num": 34,
+      "name": "Good Coworking",
+      "address": "1808 S. Good Latimer Expwy, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7710,
+      "lon": -96.7835
+    },
+    {
+      "num": 35,
+      "name": "Nostalgia Studio",
+      "address": "1808 S. Good Latimer Expwy, Dallas, TX",
+      "medium": "artist studio",
+      "description": "",
+      "website": "",
+      "lat": 32.7710,
+      "lon": -96.7833
+    },
+    {
+      "num": 36,
+      "name": "Tractorbeam",
+      "address": "1526 S. Good Latimer Expwy, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7745,
+      "lon": -96.7835
+    },
+    {
+      "num": 37,
+      "name": "Jamaica Cabana",
+      "address": "1835 S. Harwood Street, Dallas, TX",
+      "medium": "sponsor",
+      "description": "",
+      "website": "",
+      "lat": 32.7702,
+      "lon": -96.7875
     }
   ],
   "userState": {
@@ -295,7 +385,6 @@
     "favoritedStudios": [],
     "visitedStudios": []
   },
-  "lastUpdated": "2025-10-25T17:33:18.986Z",
-  "version": "1.0.0",
-  "_sha": "2de6beff5d7adc0e5a01ee7426e68c542d694f7f"
+  "lastUpdated": "2025-11-22T00:00:00.000Z",
+  "version": "2.0.0"
 }
