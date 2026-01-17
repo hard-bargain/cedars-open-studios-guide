@@ -951,7 +951,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
     <script>
         // ============================================
         // SUPABASE CONFIGURATION
@@ -962,7 +962,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoa2VkYXBsb2J2eGJ1d2htaXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MzY0MTgsImV4cCI6MjA3OTQxMjQxOH0.sSGktyARWMZ48Glr8djWTZl5nQz50ICl8A1Ck9j_1GE';
 
         // Initialize Supabase client
-        let supabase = null;
+        let supabaseClient = null;
         let currentUser = null;
         let currentTour = null;
         let locationIdMap = {}; // Maps location num to UUID
@@ -1034,10 +1034,10 @@
         }
 
         async function initializeSupabase() {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
             // Sign in anonymously - creates a session without requiring user credentials
-            const { data, error } = await supabase.auth.signInAnonymously();
+            const { data, error } = await supabaseClient.auth.signInAnonymously();
 
             if (error) {
                 console.error('Anonymous auth error:', error);
@@ -1049,12 +1049,12 @@
         }
 
         async function loadFromSupabase() {
-            if (!supabase || !currentUser) {
+            if (!supabaseClient || !currentUser) {
                 throw new Error('Supabase not initialized');
             }
 
             // Load active tour
-            const { data: tours, error: tourError } = await supabase
+            const { data: tours, error: tourError } = await supabaseClient
                 .from('tours')
                 .select('*')
                 .eq('is_active', true)
@@ -1068,7 +1068,7 @@
             currentTour = tours[0];
 
             // Load locations for this tour
-            const { data: locations, error: locError } = await supabase
+            const { data: locations, error: locError } = await supabaseClient
                 .from('locations')
                 .select('*')
                 .eq('tour_id', currentTour.id)
@@ -1094,7 +1094,7 @@
             });
 
             // Load user's visits/preferences
-            const { data: visits, error: visitError } = await supabase
+            const { data: visits, error: visitError } = await supabaseClient
                 .from('user_visits')
                 .select('*')
                 .eq('user_id', currentUser.id);
@@ -1114,7 +1114,7 @@
             }
 
             // Load user's notes
-            const { data: notes, error: notesError } = await supabase
+            const { data: notes, error: notesError } = await supabaseClient
                 .from('user_notes')
                 .select('*')
                 .eq('user_id', currentUser.id);
@@ -1131,7 +1131,7 @@
             }
 
             // Load user's ratings
-            const { data: ratings, error: ratingsError } = await supabase
+            const { data: ratings, error: ratingsError } = await supabaseClient
                 .from('user_ratings')
                 .select('*')
                 .eq('user_id', currentUser.id);
@@ -1193,7 +1193,7 @@
         }
 
         async function saveUserVisit(locationNum, visited, skipped, favorited) {
-            if (!isSupabaseConfigured() || !supabase || !currentUser) {
+            if (!isSupabaseConfigured() || !supabaseClient || !currentUser) {
                 // Save to localStorage as fallback
                 saveToLocalStorage();
                 return;
@@ -1203,7 +1203,7 @@
             if (!locationId) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('user_visits')
                     .upsert({
                         user_id: currentUser.id,
@@ -1223,7 +1223,7 @@
         }
 
         async function saveUserNote(locationNum, note) {
-            if (!isSupabaseConfigured() || !supabase || !currentUser) {
+            if (!isSupabaseConfigured() || !supabaseClient || !currentUser) {
                 userNotes[locationNum] = note;
                 saveToLocalStorage();
                 return;
@@ -1233,7 +1233,7 @@
             if (!locationId) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('user_notes')
                     .upsert({
                         user_id: currentUser.id,
@@ -1253,7 +1253,7 @@
         }
 
         async function saveUserRating(locationNum, rating) {
-            if (!isSupabaseConfigured() || !supabase || !currentUser) {
+            if (!isSupabaseConfigured() || !supabaseClient || !currentUser) {
                 userRatings[locationNum] = rating;
                 saveToLocalStorage();
                 return;
@@ -1263,7 +1263,7 @@
             if (!locationId) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('user_ratings')
                     .upsert({
                         user_id: currentUser.id,
