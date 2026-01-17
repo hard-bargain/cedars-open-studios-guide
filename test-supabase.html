@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 4px solid #ccc;
+        }
+        .test-item.pending {
+            background: #f0f0f0;
+            border-left-color: #999;
+        }
+        .test-item.success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+        .test-item.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+        .test-item h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+        .test-item pre {
+            margin: 8px 0 0 0;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .config {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Supabase Connection Diagnostics</h1>
+
+        <div class="config">
+            <div><strong>Supabase URL:</strong> https://uhkedaplobvxbuwhmiwo.supabase.co</div>
+            <div><strong>Anon Key:</strong> eyJhbGci...1GE (configured)</div>
+        </div>
+
+        <button id="runTest" onclick="runTests()">Run Diagnostic Tests</button>
+
+        <div id="test1" class="test-item pending">
+            <h3>1. Supabase Client Initialization</h3>
+            <p>Testing if Supabase client library loads correctly...</p>
+        </div>
+
+        <div id="test2" class="test-item pending">
+            <h3>2. Anonymous Authentication</h3>
+            <p>Testing if anonymous sign-in is enabled...</p>
+        </div>
+
+        <div id="test3" class="test-item pending">
+            <h3>3. Tours Table Access</h3>
+            <p>Testing if the tours table exists and is accessible...</p>
+        </div>
+
+        <div id="test4" class="test-item pending">
+            <h3>4. Active Tour Data</h3>
+            <p>Testing if there's an active tour with data...</p>
+        </div>
+
+        <div id="test5" class="test-item pending">
+            <h3>5. Locations Table</h3>
+            <p>Testing if locations table has data...</p>
+        </div>
+
+        <div id="recommendations" style="display:none; margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 6px;">
+            <h3>Recommendations</h3>
+            <ul id="recommendationList"></ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://uhkedaplobvxbuwhmiwo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoa2VkYXBsb2J2eGJ1d2htaXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MzY0MTgsImV4cCI6MjA3OTQxMjQxOH0.sSGktyARWMZ48Glr8djWTZl5nQz50ICl8A1Ck9j_1GE';
+
+        let recommendations = [];
+
+        function updateTest(testId, status, message, details = null) {
+            const element = document.getElementById(testId);
+            element.className = `test-item ${status}`;
+            element.innerHTML = `<h3>${element.querySelector('h3').textContent}</h3><p>${message}</p>`;
+            if (details) {
+                element.innerHTML += `<pre>${JSON.stringify(details, null, 2)}</pre>`;
+            }
+        }
+
+        function addRecommendation(text) {
+            recommendations.push(text);
+        }
+
+        async function runTests() {
+            document.getElementById('runTest').disabled = true;
+            recommendations = [];
+
+            // Test 1: Client Initialization
+            try {
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                updateTest('test1', 'success', 'Supabase client initialized successfully!');
+
+                // Test 2: Anonymous Auth
+                try {
+                    const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+
+                    if (authError) {
+                        updateTest('test2', 'error', 'Anonymous authentication failed!', authError);
+                        addRecommendation('Enable Anonymous Authentication in your Supabase dashboard: Authentication → Providers → Anonymous Sign-ins');
+                        document.getElementById('runTest').disabled = false;
+                        showRecommendations();
+                        return;
+                    }
+
+                    updateTest('test2', 'success', `Anonymous authentication successful! User ID: ${authData.user.id.substring(0, 8)}...`);
+
+                    // Test 3: Tours Table
+                    try {
+                        const { data: tours, error: toursError } = await supabase
+                            .from('tours')
+                            .select('*')
+                            .limit(1);
+
+                        if (toursError) {
+                            updateTest('test3', 'error', 'Failed to access tours table!', toursError);
+                            if (toursError.code === '42P01') {
+                                addRecommendation('The tours table does not exist. Run the supabase-schema.sql file in your Supabase SQL Editor.');
+                            } else {
+                                addRecommendation('Check Row Level Security policies and ensure anonymous users can read the tours table.');
+                            }
+                            showRecommendations();
+                            document.getElementById('runTest').disabled = false;
+                            return;
+                        }
+
+                        updateTest('test3', 'success', `Tours table accessible! Found ${tours ? tours.length : 0} tours.`);
+
+                        // Test 4: Active Tour
+                        const { data: activeTours, error: activeError } = await supabase
+                            .from('tours')
+                            .select('*')
+                            .eq('is_active', true);
+
+                        if (activeError || !activeTours || activeTours.length === 0) {
+                            updateTest('test4', 'error', 'No active tour found!', activeError || { message: 'No tours with is_active=true' });
+                            addRecommendation('Run the supabase-seed.sql file to insert the 2025 Cedars Open Studios tour data.');
+                            showRecommendations();
+                            document.getElementById('runTest').disabled = false;
+                            return;
+                        }
+
+                        const activeTour = activeTours[0];
+                        updateTest('test4', 'success', `Active tour found: ${activeTour.name}`, {
+                            id: activeTour.id,
+                            name: activeTour.name,
+                            date: activeTour.date,
+                            slug: activeTour.slug
+                        });
+
+                        // Test 5: Locations
+                        const { data: locations, error: locationsError } = await supabase
+                            .from('locations')
+                            .select('*')
+                            .eq('tour_id', activeTour.id);
+
+                        if (locationsError) {
+                            updateTest('test5', 'error', 'Failed to access locations table!', locationsError);
+                            if (locationsError.code === '42P01') {
+                                addRecommendation('The locations table does not exist. Run the supabase-schema.sql file in your Supabase SQL Editor.');
+                            }
+                            showRecommendations();
+                            document.getElementById('runTest').disabled = false;
+                            return;
+                        }
+
+                        if (!locations || locations.length === 0) {
+                            updateTest('test5', 'error', 'No locations found for active tour!');
+                            addRecommendation('Run the supabase-seed.sql file to insert location data for the tour.');
+                            showRecommendations();
+                            document.getElementById('runTest').disabled = false;
+                            return;
+                        }
+
+                        updateTest('test5', 'success', `Locations table has ${locations.length} locations for the active tour!`, {
+                            count: locations.length,
+                            sample: locations.slice(0, 2).map(l => ({ num: l.num, name: l.name }))
+                        });
+
+                        // All tests passed!
+                        if (recommendations.length === 0) {
+                            addRecommendation('All tests passed! Your Supabase configuration is working correctly. ✅');
+                        }
+                        showRecommendations();
+
+                    } catch (error) {
+                        updateTest('test3', 'error', 'Unexpected error accessing database!', { message: error.message });
+                        addRecommendation('Check your Supabase project settings and ensure the project URL is correct.');
+                    }
+
+                } catch (error) {
+                    updateTest('test2', 'error', 'Unexpected authentication error!', { message: error.message });
+                    addRecommendation('Check your Supabase project status and ensure anonymous auth is enabled.');
+                }
+
+            } catch (error) {
+                updateTest('test1', 'error', 'Failed to initialize Supabase client!', { message: error.message });
+                addRecommendation('Verify your Supabase URL and Anon Key are correct.');
+            }
+
+            document.getElementById('runTest').disabled = false;
+        }
+
+        function showRecommendations() {
+            const recDiv = document.getElementById('recommendations');
+            const recList = document.getElementById('recommendationList');
+            recList.innerHTML = recommendations.map(r => `<li>${r}</li>`).join('');
+            recDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
