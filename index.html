@@ -990,29 +990,46 @@
         // Initialize the application
         async function initializeApp() {
             if (typeof L === 'undefined') {
+                console.log('Waiting for Leaflet to load...');
                 setTimeout(initializeApp, 100);
                 return;
             }
 
-            // Check if Supabase is configured
-            if (isSupabaseConfigured()) {
-                try {
-                    await initializeSupabase();
-                    await loadFromSupabase();
-                    initializeMap();
-                    showStatus('Connected', 'success');
-                } catch (error) {
-                    console.error('Supabase error:', error);
-                    showStatus('Using offline mode', 'warning');
+            console.log('Initializing application...');
+
+            try {
+                // Check if Supabase is configured
+                if (isSupabaseConfigured()) {
+                    console.log('Supabase is configured, attempting to connect...');
+                    try {
+                        await initializeSupabase();
+                        console.log('Supabase initialized, loading data...');
+                        await loadFromSupabase();
+                        console.log('Data loaded from Supabase, initializing map...');
+                        initializeMap();
+                        showStatus('Connected', 'success');
+                        console.log('Application initialized successfully with Supabase');
+                    } catch (error) {
+                        console.error('Supabase error:', error);
+                        console.log('Falling back to offline mode...');
+                        showStatus('Using offline mode', 'warning');
+                        await loadDefaultData();
+                        initializeMap();
+                        console.log('Application initialized in offline mode');
+                    }
+                } else {
+                    // Fall back to local data.json (no Supabase configured)
+                    console.log('Supabase not configured, using local data');
                     await loadDefaultData();
                     initializeMap();
+                    showStatus('Offline mode - configure Supabase for cloud sync', 'warning');
                 }
-            } else {
-                // Fall back to local data.json (no Supabase configured)
-                console.log('Supabase not configured, using local data');
-                await loadDefaultData();
-                initializeMap();
-                showStatus('Offline mode - configure Supabase for cloud sync', 'warning');
+            } catch (error) {
+                console.error('Critical error during initialization:', error);
+                // Ensure loading screen is hidden even on error
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) loadingEl.style.display = 'none';
+                showStatus('Error loading application: ' + error.message, 'error');
             }
         }
 
@@ -1287,21 +1304,45 @@
         }
         
         function initializeMap() {
-            document.getElementById('loading').style.display = 'none';
-            
-            // Initialize map
-            map = L.map('map').setView([32.7730, -96.7920], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
+            try {
+                console.log('Hiding loading screen...');
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
+                } else {
+                    console.warn('Loading element not found');
+                }
 
-            createMarkers();
-            updateRoute();
-            updateListView();
-            
-            // Set up event delegation for popup buttons
-            setupPopupEventHandlers();
+                console.log(`Initializing map with ${studios.length} studios...`);
+
+                // Initialize map
+                map = L.map('map').setView([32.7730, -96.7920], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                console.log('Creating markers...');
+                createMarkers();
+
+                console.log('Updating route...');
+                updateRoute();
+
+                console.log('Updating list view...');
+                updateListView();
+
+                // Set up event delegation for popup buttons
+                console.log('Setting up popup event handlers...');
+                setupPopupEventHandlers();
+
+                console.log('Map initialization complete');
+            } catch (error) {
+                console.error('Error in initializeMap:', error);
+                // Ensure loading screen is hidden even on error
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) loadingEl.style.display = 'none';
+                throw error;
+            }
         }
         
         function setupPopupEventHandlers() {
